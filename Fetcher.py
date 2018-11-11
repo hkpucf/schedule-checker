@@ -25,8 +25,6 @@ def fetch_html(year, month, day, start, end):
 
 		(username, password) = getCredential()
 
-		print(username, password)
-
 		session.request(
 			"POST",
 			"https://www40.polyu.edu.hk/cdoirbs/authenUser.do",
