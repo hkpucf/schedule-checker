@@ -23,6 +23,7 @@ class Handler(SimpleHTTPRequestHandler):
 		self.protocol_version = 'HTTP/1.1'
 		self.send_response(200, 'OK')
 		self.send_header('Content-type', 'application/json')
+		self.send_header('Access-Control-Allow-Origin', '*')
 		self.end_headers()
 
 		# Validate paramiters
