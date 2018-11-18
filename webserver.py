@@ -1,6 +1,7 @@
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 import json
+import Cache
 import Fetcher
 import Scheduler
 
@@ -47,8 +48,13 @@ class Handler(SimpleHTTPRequestHandler):
 			return
 
 		# Create the response
-		html = Fetcher.fetch_html(int(params[0]), int(params[1]), int(params[2]), int("0830"), int("2200"))
-		scheduleList = Fetcher.parseHTML2List(html)
+		try:
+			scheduleList = Cache.readCache(params[0], params[1], params[2])
+		except IOError:
+			html = Fetcher.fetch_html(int(params[0]), int(params[1]), int(params[2]), int("0830"), int("2200"))
+			scheduleList = Fetcher.parseHTML2List(html)
+			Cache.saveCache(params[0], params[1], params[2], scheduleList)
+
 		response = Scheduler.filterTable(scheduleList, int(params[3]), int(params[4]))
 
 		# Write the response
