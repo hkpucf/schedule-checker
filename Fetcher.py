@@ -85,7 +85,7 @@ def fetch_html(year, month, day, start, end):
 		res = session.request("GET", "https://www40.polyu.edu.hk/cdoirbs/popUpDailyReport.do")
 
 		tokenPattern = re.compile("name=\"struts\\.token\" value=\"([a-zA-z\\d]+)\"")
-		match = tokenPattern.search(res.content)
+		match = tokenPattern.search(res.content.decode('utf-8'))
 		token = match.group(1)
 
 		res = session.request(
@@ -100,14 +100,14 @@ def fetch_html(year, month, day, start, end):
 			]
 		)
 
-		return res.content
+		return res.content.decode('utf-8')
 
 def parseHTML2List(html):
 	resultList = []
 	parser = HTMLParser.fromstring(html)
 	rows = iter(parser.xpath("//tr[@class='report_body']/parent::table//tr"))
 	for row in rows:
-		values = [col.text.strip() if isinstance(col.text, basestring) else col.text for col in row]
+		values = [col.text.strip() if isinstance(col.text, str) else col.text for col in row]
 		if(len(values) > 1):
 			resultList.append(values)
 	return resultList

@@ -43,8 +43,8 @@ def mergeSortTable(table):
 	if(len(table) <= 1):
 		return table
 
-	left = mergeSortTable(table[:len(table) / 2])
-	right = mergeSortTable(table[len(table) / 2:])
+	left = mergeSortTable(table[:int(len(table) / 2)])
+	right = mergeSortTable(table[int(len(table) / 2):])
 
 	return mergeTable(left, right)
 

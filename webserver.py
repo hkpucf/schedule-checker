@@ -1,5 +1,4 @@
-from BaseHTTPServer import HTTPServer
-from SimpleHTTPServer import SimpleHTTPRequestHandler
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import Cache
 import Fetcher
@@ -45,7 +44,7 @@ class Handler(SimpleHTTPRequestHandler):
 				["start_time", "int"],
 				["end_time", "int"]
 			]
-			self.wfile.write(bytes(json.dumps(response)))
+			self.wfile.write(json.dumps(response).encode('utf-8'))
 			return
 
 		# Create the response
@@ -59,10 +58,10 @@ class Handler(SimpleHTTPRequestHandler):
 		response = Scheduler.filterTable(scheduleList, int(params[3]), int(params[4]))
 
 		# Write the response
-		self.wfile.write(bytes(json.dumps(response)))
+		self.wfile.write(json.dumps(response).encode('utf-8'))
 		return
 
 httpd = HTTPServer(("0.0.0.0", PORT), Handler)
 
-print "serving at port", PORT
+print("serving at port", PORT)
 httpd.serve_forever()
