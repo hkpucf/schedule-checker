@@ -50,6 +50,8 @@ def mergeSortTable(table):
 
 def getFreeTimeslot(table):
 	freeTimeslotTable = []
+	if(len(table) < 1):
+		return freeTimeslotTable
 	room = table[0][ROOM_NO_COL]
 	capacity = table[0][CAPACITY_COL]
 	furniture = table[0][FURNITURE_COL]
