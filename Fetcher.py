@@ -20,6 +20,13 @@ def getCredential():
 		return ("", "")
 
 def fetch_html(year, month, day, start, end):
+	requests.packages.urllib3.disable_warnings()
+	requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+	try:
+		requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
+	except AttributeError:
+		pass
+
 	with requests.Session() as session:
 		session.request("GET", "https://www40.polyu.edu.hk/cdoirbs/index.jsp")
 
