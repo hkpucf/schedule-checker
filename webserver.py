@@ -1,67 +1,41 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-import json
+from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
 import Cache
 import Fetcher
 import Scheduler
 
-PORT = 80
+app = Flask(__name__)
 
-def isInt(value):
+@app.route('/<int:year>/<int:month>/<int:date>/<int:start_time>/<int:end_time>')
+def searchRoom(year, month, date, start_time, end_time):
+	# Create the response
 	try:
-		int(value)
-		return True
-	except ValueError:
-		return False
+		scheduleList = Cache.readCache(year, month, date)
+	except IOError:
+		html = Fetcher.fetch_html(int(year), int(month), int(date), int("0830"), int("2200"))
+		scheduleList = Fetcher.parseHTML2List(html)
+		Cache.saveCache(year, month, date, scheduleList)
 
-class Handler(SimpleHTTPRequestHandler):
-	def do_GET(self):
-		params = self.path.split('/')
-		params = params[1:]
+	response = Scheduler.filterTable(scheduleList, int(start_time), int(end_time))
 
-		# Response header
-		self.protocol_version = 'HTTP/1.1'
-		self.send_response(200, 'OK')
-		self.send_header('Content-type', 'application/json')
-		self.send_header('Access-Control-Allow-Origin', '*')
-		self.end_headers()
+	# Write the response
+	res = jsonify(response)
+	res.mimetype = 'application/json'
+	res.headers['Access-Control-Allow-Origin'] = '*'
+	return res
 
-		# Validate paramiters
-		error = False
-		if(len(params) != 5):
-			error = True
+@app.errorhandler(404)
+def errHandler(error):
+	return jsonify(
+			errMsg='Invalid API path'
+		), 500
 
-		for item in params:
-			if(not isInt(item)):
-				error = True
-				break
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+	return jsonify(
+			code=e.code,
+			name=e.name,
+			description=e.description
+		), e.code
 
-		if(error):
-			response = [
-				["path", params],
-				["year", "int"],
-				["month", "int"],
-				["date", "int"],
-				["start_time", "int"],
-				["end_time", "int"]
-			]
-			self.wfile.write(json.dumps(response).encode('utf-8'))
-			return
-
-		# Create the response
-		try:
-			scheduleList = Cache.readCache(params[0], params[1], params[2])
-		except IOError:
-			html = Fetcher.fetch_html(int(params[0]), int(params[1]), int(params[2]), int("0830"), int("2200"))
-			scheduleList = Fetcher.parseHTML2List(html)
-			Cache.saveCache(params[0], params[1], params[2], scheduleList)
-
-		response = Scheduler.filterTable(scheduleList, int(params[3]), int(params[4]))
-
-		# Write the response
-		self.wfile.write(json.dumps(response).encode('utf-8'))
-		return
-
-httpd = HTTPServer(("0.0.0.0", PORT), Handler)
-
-print("serving at port", PORT)
-httpd.serve_forever()
+app.run(host='0.0.0.0', port=80)

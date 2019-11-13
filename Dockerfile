@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install requests lxml
+RUN pip install flask requests lxml
 
 EXPOSE 80
 
