@@ -86,6 +86,19 @@ def filterTable(table, start, end):
 
 	return newTable
 
+def selectRoom(table, room):
+	table = mergeSortTable(table[1:])
+
+	freeTimeslotTable = getFreeTimeslot(table)
+
+	newTable = []
+
+	for row in freeTimeslotTable:
+		if(row[0] == room):
+			newTable.append(row)
+
+	return newTable
+
 if __name__ == "__main__":
 	with open("data.csv", 'rb') as csvfile:
 		table = list(csv.reader(csvfile, delimiter=',', quotechar='"'))
